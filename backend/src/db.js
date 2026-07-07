@@ -1,5 +1,7 @@
+// Import the mysql2/promise module to create a connection pool
 const mysql = require("mysql2/promise");
 
+// Create a connection pool using environment variables for configuration
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -11,4 +13,5 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// Export the pool for use in other parts of the application
 module.exports = pool;
