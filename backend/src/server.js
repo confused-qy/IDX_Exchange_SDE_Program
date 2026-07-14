@@ -13,6 +13,21 @@ app.use(cors());
 // Parse JSON bodies
 app.use(express.json());
 
+// Log every completed request with its final status and elapsed time.
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const startedAt = process.hrtime.bigint();
+
+  res.on("finish", () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    console.log(
+      `${timestamp} ${req.method} ${req.originalUrl} ${res.statusCode} ${durationMs.toFixed(2)}ms`
+    );
+  });
+
+  next();
+});
+
 app.use("/api/properties", propertiesRouter);
 
 // Routes

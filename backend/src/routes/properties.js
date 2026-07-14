@@ -3,6 +3,9 @@ const pool = require("../db");
 
 const router = express.Router();
 
+const MAX_LISTING_ID_LENGTH = 255;
+const LISTING_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
+
 const ALLOWED_QUERY_PARAMS = new Set([
   "city",
   "zipcode",
@@ -68,6 +71,21 @@ function parseText(value, name) {
   }
 
   return value;
+}
+
+function isValidListingId(id) {
+  return (
+    typeof id === "string" &&
+    id.length > 0 &&
+    id.length <= MAX_LISTING_ID_LENGTH &&
+    LISTING_ID_PATTERN.test(id)
+  );
+}
+
+function sendInvalidListingId(res) {
+  return res.status(400).json({
+    error: `Listing ID must be 1-${MAX_LISTING_ID_LENGTH} characters and contain only letters, numbers, hyphens, or underscores`,
+  });
 }
 
 router.get("/", async (req, res) => {
@@ -162,6 +180,74 @@ router.get("/", async (req, res) => {
   } catch (error) {
     res.status(400).json({
       error: error.message,
+    });
+  }
+});
+
+// Keep this more-specific route before /:id so it is matched first.
+router.get("/:id/openhouses", async (req, res) => {
+  const { id } = req.params;
+
+  if (!isValidListingId(id)) {
+    return sendInvalidListingId(res);
+  }
+
+  try {
+    const [properties] = await pool.query(
+      "SELECT L_ListingID FROM rets_property WHERE L_ListingID = ? LIMIT 1",
+      [id]
+    );
+
+    if (properties.length === 0) {
+      return res.status(404).json({
+        error: `Property with listing ID ${id} was not found`,
+      });
+    }
+
+    const [openHouses] = await pool.query(
+      `SELECT *
+       FROM rets_openhouse
+       WHERE L_ListingID = ?
+       ORDER BY COALESCE(OH_StartDate, OpenHouseDate) ASC,
+                OH_StartTime ASC`,
+      [id]
+    );
+
+    // all_data is deliberately returned as stored. Parsing malformed legacy JSON
+    // here could make one bad row crash the entire request.
+    return res.json(openHouses);
+  } catch (error) {
+    console.error(`Failed to retrieve open houses for ${id}:`, error);
+    return res.status(500).json({
+      error: "Failed to retrieve open houses",
+    });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!isValidListingId(id)) {
+    return sendInvalidListingId(res);
+  }
+
+  try {
+    const [properties] = await pool.query(
+      "SELECT * FROM rets_property WHERE L_ListingID = ? LIMIT 1",
+      [id]
+    );
+
+    if (properties.length === 0) {
+      return res.status(404).json({
+        error: `Property with listing ID ${id} was not found`,
+      });
+    }
+
+    return res.json(properties[0]);
+  } catch (error) {
+    console.error(`Failed to retrieve property ${id}:`, error);
+    return res.status(500).json({
+      error: "Failed to retrieve property",
     });
   }
 });
