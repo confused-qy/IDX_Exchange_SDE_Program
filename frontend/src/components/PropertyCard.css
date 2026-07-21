@@ -1,0 +1,134 @@
+.property-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(25, 57, 45, 0.09);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 49, 39, 0.08);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.property-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 38px rgba(25, 49, 39, 0.16);
+}
+
+.property-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #dce3dc;
+}
+
+.property-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 350ms ease;
+}
+
+.property-card:hover .property-card__image {
+  transform: scale(1.035);
+}
+
+.property-card__placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  color: #587065;
+  background: linear-gradient(145deg, #e9ede8, #d8e0da);
+  font-size: 0.88rem;
+}
+
+.property-card__placeholder svg {
+  width: 54px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.property-card__status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #173b2e;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.property-card__body {
+  padding: 20px;
+}
+
+.property-card__price {
+  margin: 0 0 8px;
+  color: #12372a;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 2vw, 1.8rem);
+  font-weight: 700;
+}
+
+.property-card__address {
+  overflow: hidden;
+  margin: 0;
+  color: #17211d;
+  font-size: 1.02rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-card__location {
+  margin: 5px 0 18px;
+  color: #66736d;
+  font-size: 0.92rem;
+}
+
+.property-card__facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid #e5e8e5;
+}
+
+.property-card__facts div + div {
+  border-left: 1px solid #e5e8e5;
+}
+
+.property-card__facts div {
+  text-align: center;
+}
+
+.property-card__facts dt {
+  margin-bottom: 3px;
+  color: #7b8580;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.property-card__facts dd {
+  margin: 0;
+  color: #263b32;
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .property-card,
+  .property-card__image {
+    transition: none;
+  }
+}

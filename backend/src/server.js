@@ -57,7 +57,8 @@ app.get("/api/health", async (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+// Port 5000 is commonly occupied by AirPlay Receiver on macOS.
+const PORT = process.env.PORT || 5001;
 const HOST = process.env.HOST || "127.0.0.1";
 
 app.listen(PORT, HOST, () => {
