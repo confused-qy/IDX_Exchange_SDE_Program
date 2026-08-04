@@ -19,6 +19,20 @@ test("fetchProperties builds the expected query and returns JSON", async () => {
   expect(data.total).toBe(1);
 });
 
+test("fetchProperties omits empty filter values", async () => {
+  jest.spyOn(global, "fetch").mockResolvedValue({
+    ok: true,
+    json: async () => ({ total: 0, results: [] }),
+  });
+
+  await fetchProperties({ city: "", zipcode: null, beds: undefined, baths: "2" });
+
+  expect(global.fetch).toHaveBeenCalledWith(
+    "/api/properties?baths=2",
+    expect.any(Object)
+  );
+});
+
 test("uses the backend error message for an HTTP error", async () => {
   jest.spyOn(global, "fetch").mockResolvedValue({
     ok: false,

@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchProperties } from "../api/client";
 import PropertyCard from "../components/PropertyCard";
+import PropertyFilters from "../components/PropertyFilters";
+import Pagination from "../components/Pagination";
 import "./ListingsPage.css";
 
 const PAGE_SIZE = 20;
@@ -10,42 +12,78 @@ function ListingsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(PAGE_SIZE);
+  const activeFilters = useRef({});
+  const requestSequence = useRef(0);
+  const activeController = useRef(null);
 
-  const loadProperties = useCallback(async (signal) => {
+  const loadProperties = useCallback(async (filters = {}, page = 1) => {
+    activeController.current?.abort();
+    const controller = new AbortController();
+    activeController.current = controller;
+    const requestId = ++requestSequence.current;
+
     setLoading(true);
     setError("");
 
     try {
-      const data = await fetchProperties({ limit: PAGE_SIZE, offset: 0 });
+      const data = await fetchProperties(
+        { ...filters, limit: itemsPerPage, offset: (page - 1) * itemsPerPage },
+        { signal: controller.signal }
+      );
 
       if (!data || !Array.isArray(data.results)) {
         throw new Error("The property server returned an unexpected data format.");
       }
 
-      if (!signal.aborted) {
+      if (!controller.signal.aborted && requestId === requestSequence.current) {
         setProperties(data.results);
         setTotal(Number(data.total) || 0);
       }
     } catch (requestError) {
-      if (!signal.aborted) {
+      if (!controller.signal.aborted && requestId === requestSequence.current) {
         setProperties([]);
         setTotal(0);
         setError(requestError.message || "Unable to load properties.");
       }
     } finally {
-      if (!signal.aborted) {
+      if (!controller.signal.aborted && requestId === requestSequence.current) {
         setLoading(false);
       }
     }
-  }, []);
+  }, [itemsPerPage]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    loadProperties(controller.signal);
+    loadProperties({});
 
-    return () => controller.abort();
-  }, [loadProperties, retryCount]);
+    return () => activeController.current?.abort();
+  }, [loadProperties]);
+
+  const handleSearch = (filters) => {
+    activeFilters.current = filters;
+    setCurrentPage(1);
+    loadProperties(filters, 1);
+  };
+
+  const handleClear = () => {
+    activeFilters.current = {};
+    setCurrentPage(1);
+    loadProperties({}, 1);
+  };
+
+  const totalPages = Math.ceil(total / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+
+    setCurrentPage(page);
+    loadProperties(activeFilters.current, page);
+    window.scrollTo(0, 0);
+  };
+
+  const firstResult = total === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const lastResult = Math.min(currentPage * itemsPerPage, total);
 
   return (
     <main>
@@ -59,6 +97,12 @@ function ListingsPage() {
         </div>
       </header>
 
+      <PropertyFilters
+        onSearch={handleSearch}
+        onClear={handleClear}
+        disabled={loading}
+      />
+
       <section className="listings" aria-labelledby="listings-heading">
         <div className="listings__heading">
           <div>
@@ -67,7 +111,7 @@ function ListingsPage() {
           </div>
           {!loading && !error && (
             <p className="listings__count" aria-live="polite">
-              Showing <strong>{properties.length}</strong> of <strong>{total}</strong> properties
+              Showing <strong>{firstResult}-{lastResult}</strong> of <strong>{total}</strong> properties
             </p>
           )}
         </div>
@@ -83,7 +127,10 @@ function ListingsPage() {
           <div className="state-panel state-panel--error" role="alert">
             <h3>We couldn't load the listings</h3>
             <p>{error}</p>
-            <button type="button" onClick={() => setRetryCount((count) => count + 1)}>
+            <button
+              type="button"
+              onClick={() => loadProperties(activeFilters.current, currentPage)}
+            >
               Try again
             </button>
           </div>
@@ -92,19 +139,26 @@ function ListingsPage() {
         {!loading && !error && properties.length === 0 && (
           <div className="state-panel">
             <h3>No properties found</h3>
-            <p>There are no listings to display right now.</p>
+            <p>Try adjusting or clearing your filters to see more homes.</p>
           </div>
         )}
 
         {!loading && !error && properties.length > 0 && (
-          <div className="property-grid">
-            {properties.map((property) => (
-              <PropertyCard
-                key={property.L_ListingID || property.id}
-                property={property}
-              />
-            ))}
-          </div>
+          <>
+            <div className="property-grid">
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property.L_ListingID || property.id}
+                  property={property}
+                />
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </section>
     </main>

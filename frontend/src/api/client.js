@@ -40,7 +40,7 @@ async function request(url, options = {}) {
   }
 }
 
-export function fetchProperties(params = {}) {
+export function fetchProperties(params = {}, options = {}) {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -50,7 +50,7 @@ export function fetchProperties(params = {}) {
   });
 
   const query = searchParams.toString();
-  return request(`${API_ROOT}${query ? `?${query}` : ""}`);
+  return request(`${API_ROOT}${query ? `?${query}` : ""}`, options);
 }
 
 export function fetchPropertyDetail(id) {
