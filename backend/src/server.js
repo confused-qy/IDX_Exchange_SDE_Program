@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
 const propertiesRouter = require("./routes/properties");
+const openHousesRouter = require("./routes/openhouses");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/properties", propertiesRouter);
+app.use("/api/openhouses", openHousesRouter);
 
 // Routes
 app.get("/", (req, res) => {

@@ -77,3 +77,12 @@ export function fetchFavoriteProperties(ids, options = {}) {
   const searchParams = new URLSearchParams({ ids: ids.join(",") });
   return request(`${API_ROOT}/favorites?${searchParams}`, options);
 }
+
+export function fetchOpenHouseCalendar(startDate, endDate, options = {}) {
+  const searchParams = new URLSearchParams({ startDate, endDate });
+  return request(`/api/openhouses?${searchParams}`, options);
+}
+
+export function fetchOpenHouseRange(options = {}) {
+  return request("/api/openhouses/range", options);
+}

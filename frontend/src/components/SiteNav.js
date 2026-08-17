@@ -4,6 +4,6 @@ import "./SiteNav.css";
 
 function SiteNav() {
   const { favoriteCount } = useFavorites();
-  return <nav className="site-nav" aria-label="Main navigation"><Link to="/">Listings</Link><Link to="/favorites">Favorites <span>{favoriteCount}</span></Link></nav>;
+  return <nav className="site-nav" aria-label="Main navigation"><Link to="/">Listings</Link><Link to="/open-houses">Open Houses</Link><Link to="/favorites">Favorites <span>{favoriteCount}</span></Link></nav>;
 }
 export default SiteNav;

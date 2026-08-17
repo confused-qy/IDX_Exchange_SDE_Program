@@ -4,6 +4,7 @@ import PropertyDetailPage from "./pages/PropertyDetailPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import SiteNav from "./components/SiteNav";
 import { FavoritesProvider } from "./hooks/useFavorites";
+import OpenHouseCalendarPage from "./pages/OpenHouseCalendarPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ListingsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/open-houses" element={<OpenHouseCalendarPage />} />
           <Route path="/property/:id" element={<PropertyDetailPage />} />
         </Routes>
       </FavoritesProvider>
