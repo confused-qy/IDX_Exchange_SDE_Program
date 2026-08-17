@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { fetchProperties } from "../api/client";
+import { MemoryRouter } from "react-router-dom";
+import { FavoritesProvider } from "../hooks/useFavorites";
 import ListingsPage from "./ListingsPage";
 
 jest.mock("../api/client", () => ({
@@ -14,6 +16,10 @@ function makeProperties(offset, count) {
     L_State: "WA",
     L_SystemPrice: 500000,
   }));
+}
+
+function renderPage() {
+  return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FavoritesProvider><ListingsPage /></FavoritesProvider></MemoryRouter>);
 }
 
 beforeEach(() => {
@@ -31,7 +37,7 @@ afterEach(() => {
 });
 
 test("shows the result range and requests the selected page", async () => {
-  render(<ListingsPage />);
+  renderPage();
 
   expect(await screen.findByText("1 Test Street")).toBeInTheDocument();
   expect(screen.getByText(/Showing/)).toHaveTextContent(
@@ -42,7 +48,7 @@ test("shows the result range and requests the selected page", async () => {
 
   expect(await screen.findByText("21 Test Street")).toBeInTheDocument();
   expect(fetchProperties).toHaveBeenLastCalledWith(
-    expect.objectContaining({ limit: 20, offset: 20 }),
+      expect.objectContaining({ limit: 20, offset: 20, sortBy: "ListingContractDate", sortOrder: "desc" }),
     expect.objectContaining({ signal: expect.any(AbortSignal) })
   );
   expect(screen.getByText(/Showing/)).toHaveTextContent(
@@ -52,7 +58,7 @@ test("shows the result range and requests the selected page", async () => {
 });
 
 test("preserves active filters while paging", async () => {
-  render(<ListingsPage />);
+  renderPage();
   await screen.findByText("1 Test Street");
 
   fireEvent.change(screen.getByLabelText("City"), {
@@ -76,7 +82,7 @@ test("preserves active filters while paging", async () => {
 });
 
 test("applying a new filter resets pagination to page one", async () => {
-  render(<ListingsPage />);
+  renderPage();
   await screen.findByText("1 Test Street");
 
   fireEvent.click(screen.getByRole("button", { name: "Go to page 2" }));
@@ -105,7 +111,7 @@ test("applying a new filter resets pagination to page one", async () => {
 
 test("hides pagination when filtered results fit on one page", async () => {
   fetchProperties.mockResolvedValue({ results: makeProperties(0, 8), total: 8 });
-  render(<ListingsPage />);
+  renderPage();
 
   expect(await screen.findByText("1 Test Street")).toBeInTheDocument();
   expect(
@@ -114,4 +120,23 @@ test("hides pagination when filtered results fit on one page", async () => {
   expect(screen.getByText(/Showing/)).toHaveTextContent(
     "Showing 1-8 of 8 properties"
   );
+});
+
+test("preserves sorting across pages and resets it when filters change", async () => {
+  renderPage();
+  await screen.findByText("1 Test Street");
+  fireEvent.change(screen.getByLabelText("Sort by"), { target: { value: "L_SystemPrice:asc" } });
+  await waitFor(() => expect(fetchProperties).toHaveBeenLastCalledWith(
+    expect.objectContaining({ sortBy: "L_SystemPrice", sortOrder: "asc", offset: 0 }), expect.any(Object)
+  ));
+  fireEvent.click(screen.getByRole("button", { name: "Go to page 2" }));
+  await waitFor(() => expect(fetchProperties).toHaveBeenLastCalledWith(
+    expect.objectContaining({ sortBy: "L_SystemPrice", sortOrder: "asc", offset: 20 }), expect.any(Object)
+  ));
+  fireEvent.change(screen.getByLabelText("City"), { target: { value: "Seattle" } });
+  fireEvent.click(screen.getByRole("button", { name: "Search" }));
+  await waitFor(() => expect(fetchProperties).toHaveBeenLastCalledWith(
+    expect.objectContaining({ city: "Seattle", sortBy: "ListingContractDate", sortOrder: "desc", offset: 0 }), expect.any(Object)
+  ));
+  expect(screen.getByLabelText("Sort by")).toHaveValue("ListingContractDate:desc");
 });

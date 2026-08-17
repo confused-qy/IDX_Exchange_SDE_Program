@@ -3,6 +3,7 @@ import { fetchProperties } from "../api/client";
 import PropertyCard from "../components/PropertyCard";
 import PropertyFilters from "../components/PropertyFilters";
 import Pagination from "../components/Pagination";
+import SortControls, { DEFAULT_SORT } from "../components/SortControls";
 import "./ListingsPage.css";
 
 const PAGE_SIZE = 20;
@@ -15,10 +16,11 @@ function ListingsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(PAGE_SIZE);
   const activeFilters = useRef({});
+  const [sort, setSort] = useState(DEFAULT_SORT);
   const requestSequence = useRef(0);
   const activeController = useRef(null);
 
-  const loadProperties = useCallback(async (filters = {}, page = 1) => {
+  const loadProperties = useCallback(async (filters = {}, page = 1, sortValue = DEFAULT_SORT) => {
     activeController.current?.abort();
     const controller = new AbortController();
     activeController.current = controller;
@@ -28,8 +30,9 @@ function ListingsPage() {
     setError("");
 
     try {
+      const [sortBy, sortOrder] = sortValue.split(":");
       const data = await fetchProperties(
-        { ...filters, limit: itemsPerPage, offset: (page - 1) * itemsPerPage },
+        { ...filters, sortBy, sortOrder, limit: itemsPerPage, offset: (page - 1) * itemsPerPage },
         { signal: controller.signal }
       );
 
@@ -63,13 +66,15 @@ function ListingsPage() {
   const handleSearch = (filters) => {
     activeFilters.current = filters;
     setCurrentPage(1);
-    loadProperties(filters, 1);
+    setSort(DEFAULT_SORT);
+    loadProperties(filters, 1, DEFAULT_SORT);
   };
 
   const handleClear = () => {
     activeFilters.current = {};
     setCurrentPage(1);
-    loadProperties({}, 1);
+    setSort(DEFAULT_SORT);
+    loadProperties({}, 1, DEFAULT_SORT);
   };
 
   const totalPages = Math.ceil(total / itemsPerPage);
@@ -78,8 +83,14 @@ function ListingsPage() {
     if (page < 1 || page > totalPages || page === currentPage) return;
 
     setCurrentPage(page);
-    loadProperties(activeFilters.current, page);
+    loadProperties(activeFilters.current, page, sort);
     window.scrollTo(0, 0);
+  };
+
+  const handleSortChange = (value) => {
+    setSort(value);
+    setCurrentPage(1);
+    loadProperties(activeFilters.current, 1, value);
   };
 
   const firstResult = total === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
@@ -114,6 +125,7 @@ function ListingsPage() {
               Showing <strong>{firstResult}-{lastResult}</strong> of <strong>{total}</strong> properties
             </p>
           )}
+          <SortControls value={sort} onChange={handleSortChange} disabled={loading} />
         </div>
 
         {loading && (
@@ -129,7 +141,7 @@ function ListingsPage() {
             <p>{error}</p>
             <button
               type="button"
-              onClick={() => loadProperties(activeFilters.current, currentPage)}
+              onClick={() => loadProperties(activeFilters.current, currentPage, sort)}
             >
               Try again
             </button>

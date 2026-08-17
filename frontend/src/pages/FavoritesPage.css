@@ -1,0 +1,6 @@
+.favorites-page { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 35px 0 70px; }
+.favorites-page header { position: relative; margin-bottom: 26px; }
+.favorites-page header p { margin: 0; color: #22664e; font-weight: 700; text-transform: uppercase; }
+.favorites-page header h1 { margin: 5px 0; font-family: Georgia, serif; font-size: clamp(2rem, 5vw, 3rem); }
+.favorites-page header span { color: #66736d; }
+.favorites-page .state-panel a { color: #22664e; font-weight: 700; }

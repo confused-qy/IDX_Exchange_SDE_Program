@@ -53,10 +53,27 @@ export function fetchProperties(params = {}, options = {}) {
   return request(`${API_ROOT}${query ? `?${query}` : ""}`, options);
 }
 
-export function fetchPropertyDetail(id) {
+export function fetchPropertyDetail(id, options = {}) {
   if (id === undefined || id === null || String(id).trim() === "") {
     return Promise.reject(new Error("A property listing ID is required."));
   }
 
-  return request(`${API_ROOT}/${encodeURIComponent(String(id))}`);
+  return request(`${API_ROOT}/${encodeURIComponent(String(id))}`, options);
+}
+
+export function fetchOpenHouses(id, options = {}) {
+  if (id === undefined || id === null || String(id).trim() === "") {
+    return Promise.reject(new Error("A property listing ID is required."));
+  }
+
+  return request(
+    `${API_ROOT}/${encodeURIComponent(String(id))}/openhouses`,
+    options
+  );
+}
+
+export function fetchFavoriteProperties(ids, options = {}) {
+  if (!Array.isArray(ids) || ids.length === 0) return Promise.resolve([]);
+  const searchParams = new URLSearchParams({ ids: ids.join(",") });
+  return request(`${API_ROOT}/favorites?${searchParams}`, options);
 }

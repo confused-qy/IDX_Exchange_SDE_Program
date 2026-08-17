@@ -1,6 +1,6 @@
-export function getFirstPhoto(rawPhotos) {
+export function parsePhotos(rawPhotos) {
   if (rawPhotos === null || rawPhotos === undefined || rawPhotos === "") {
-    return null;
+    return [];
   }
 
   let photos = rawPhotos;
@@ -9,19 +9,23 @@ export function getFirstPhoto(rawPhotos) {
     try {
       photos = JSON.parse(rawPhotos);
     } catch (error) {
-      return null;
+      return [];
     }
   }
 
   if (!Array.isArray(photos)) {
-    return null;
+    return [];
   }
 
-  const firstValidPhoto = photos.find(
+  return photos
+    .filter(
     (photo) => typeof photo === "string" && photo.trim().length > 0
-  );
+    )
+    .map((photo) => photo.trim());
+}
 
-  return firstValidPhoto ? firstValidPhoto.trim() : null;
+export function getFirstPhoto(rawPhotos) {
+  return parsePhotos(rawPhotos)[0] || null;
 }
 
 export function formatPrice(value) {

@@ -1,33 +1,25 @@
-import { useState } from "react";
-import { formatNumber, formatPrice, getFirstPhoto } from "../utils/property";
+import { Link } from "react-router-dom";
+import { formatNumber, formatPrice } from "../utils/property";
+import PropertyImageCarousel from "./PropertyImageCarousel";
+import { useFavorites } from "../hooks/useFavorites";
 import "./PropertyCard.css";
 
 function PropertyCard({ property }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const photoUrl = getFirstPhoto(property.L_Photos);
   const address = property.L_Address || "Address unavailable";
   const location = [property.L_City, property.L_State].filter(Boolean).join(", ");
+  const id = property.L_ListingID || property.id;
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const saved = isFavorite(id);
 
   return (
     <article className="property-card">
+      <Link
+        className="property-card__link"
+        to={`/property/${encodeURIComponent(id)}`}
+        aria-label={`View ${address}`}
+      >
       <div className="property-card__media">
-        {photoUrl && !imageFailed ? (
-          <img
-            className="property-card__image"
-            src={photoUrl}
-            alt={`${address} property`}
-            loading="lazy"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="property-card__placeholder" role="img" aria-label="No property photo available">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M8 30 32 10l24 20v25H39V40H25v15H8V30Z" />
-              <path d="m18 26 14-11 14 11" />
-            </svg>
-            <span>No photo available</span>
-          </div>
-        )}
+        <PropertyImageCarousel photos={property.L_Photos} address={address} />
         <span className="property-card__status">{property.L_Status || "For sale"}</span>
       </div>
 
@@ -51,6 +43,16 @@ function PropertyCard({ property }) {
           </div>
         </dl>
       </div>
+      </Link>
+      <button
+        className={`property-card__favorite${saved ? " is-favorite" : ""}`}
+        type="button"
+        aria-label={saved ? `Remove ${address} from favorites` : `Add ${address} to favorites`}
+        aria-pressed={saved}
+        onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleFavorite(id); }}
+      >
+        {saved ? "♥" : "♡"}
+      </button>
     </article>
   );
 }

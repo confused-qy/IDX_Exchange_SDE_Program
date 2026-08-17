@@ -1,0 +1,4 @@
+.site-nav { display: flex; justify-content: flex-end; gap: 10px; padding: 14px max(20px, calc((100% - 1180px) / 2)); background: #12372a; }
+.site-nav a { padding: 8px 12px; border-radius: 999px; color: white; font-weight: 700; text-decoration: none; }
+.site-nav a:hover { background: rgba(255,255,255,.12); }
+.site-nav span { display: inline-grid; min-width: 22px; height: 22px; margin-left: 4px; place-items: center; border-radius: 50%; color: #12372a; background: #dce9df; font-size: .78rem; }

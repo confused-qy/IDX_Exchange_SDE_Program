@@ -15,6 +15,15 @@ const ALLOWED_QUERY_PARAMS = new Set([
   "baths",
   "limit",
   "offset",
+  "sortBy",
+  "sortOrder",
+]);
+
+const SORT_COLUMNS = new Set([
+  "L_SystemPrice",
+  "ListingContractDate",
+  "LM_Int2_3",
+  "L_Keyword2",
 ]);
 
 function parseWholeNumber(value, name, { min, max } = {}) {
@@ -109,6 +118,15 @@ router.get("/", async (req, res) => {
       max: 100,
     }) || 20;
     const offset = parseWholeNumber(req.query.offset, "offset", { min: 0 }) || 0;
+    const sortBy = req.query.sortBy || "ListingContractDate";
+    const sortOrder = (req.query.sortOrder || "desc").toLowerCase();
+
+    if (Array.isArray(req.query.sortBy) || !SORT_COLUMNS.has(sortBy)) {
+      return res.status(400).json({ error: "sortBy must be one of: L_SystemPrice, ListingContractDate, LM_Int2_3, L_Keyword2" });
+    }
+    if (Array.isArray(req.query.sortOrder) || !["asc", "desc"].includes(sortOrder)) {
+      return res.status(400).json({ error: "sortOrder must be asc or desc" });
+    }
 
     if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
       return res.status(400).json({
@@ -120,8 +138,8 @@ router.get("/", async (req, res) => {
     const values = [];
 
     if (city !== undefined) {
-      conditions.push("LOWER(TRIM(L_City)) = LOWER(TRIM(?))");
-      values.push(city);
+      conditions.push("L_City = ?");
+      values.push(city.trim());
     }
 
     if (zipcode !== undefined) {
@@ -163,7 +181,7 @@ router.get("/", async (req, res) => {
       SELECT *
       FROM rets_property
       ${whereClause}
-      ORDER BY id
+      ORDER BY ${sortBy} ${sortOrder.toUpperCase()}, id ${sortOrder.toUpperCase()}
       LIMIT ?
       OFFSET ?
     `;
@@ -175,12 +193,38 @@ router.get("/", async (req, res) => {
       total: countRows[0].total,
       limit,
       offset,
+      sortBy,
+      sortOrder,
       results,
     });
   } catch (error) {
     res.status(400).json({
       error: error.message,
     });
+  }
+});
+
+// Fixed route must stay above /:id so "favorites" is not treated as an ID.
+router.get("/favorites", async (req, res) => {
+  if (Array.isArray(req.query.ids) || typeof req.query.ids !== "string") {
+    return res.status(400).json({ error: "ids must be a comma-separated list" });
+  }
+  const ids = [...new Set(req.query.ids.split(",").map((id) => id.trim()).filter(Boolean))];
+  if (!ids.length) return res.json([]);
+  if (ids.length > 100 || ids.some((id) => !isValidListingId(id))) {
+    return res.status(400).json({ error: "Provide 1-100 valid listing IDs" });
+  }
+  try {
+    const placeholders = ids.map(() => "?").join(",");
+    const [properties] = await pool.query(
+      `SELECT * FROM rets_property WHERE L_ListingID IN (${placeholders})`, ids
+    );
+    const order = new Map(ids.map((id, index) => [id, index]));
+    properties.sort((a, b) => order.get(String(a.L_ListingID)) - order.get(String(b.L_ListingID)));
+    return res.json(properties);
+  } catch (error) {
+    console.error("Failed to retrieve favorite properties:", error);
+    return res.status(500).json({ error: "Failed to retrieve favorite properties" });
   }
 });
 

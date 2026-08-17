@@ -1,0 +1,4 @@
+.open-house-list { display: grid; gap: 12px; }
+.open-house { padding: 18px; border: 1px solid #dde4df; border-radius: 13px; background: #fafbf9; }
+.open-house h3, .open-house p { margin: 0; } .open-house p + p { margin-top: 10px; }
+.open-house__time { color: #22664e; font-weight: 700; }

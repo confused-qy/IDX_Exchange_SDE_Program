@@ -1,0 +1,20 @@
+.property-detail { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 70px; }
+.property-detail__back { display: inline-block; margin-bottom: 22px; color: #22664e; font-weight: 700; text-decoration: none; }
+.property-detail__header { display: flex; align-items: start; justify-content: space-between; gap: 30px; margin: 30px 0 22px; }
+.property-detail__header h1 { margin: 4px 0; font-family: Georgia, serif; font-size: clamp(1.7rem, 4vw, 2.7rem); }
+.property-detail__header p { margin: 0; color: #66736d; }
+.property-detail__header > span { padding: 7px 12px; border-radius: 999px; color: #173b2e; background: #dfece5; font-weight: 700; white-space: nowrap; }
+.property-detail__price { color: #12372a !important; font-family: Georgia, serif; font-size: 1.8rem; font-weight: 700; }
+.property-detail__stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; padding: 22px; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(25,49,39,.08); }
+.property-detail__stats div { text-align: center; } .property-detail__stats div + div { border-left: 1px solid #e1e5e2; }
+.property-detail__stats dt { color: #77817c; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.property-detail__stats dd { margin: 5px 0 0; color: #173b2e; font-size: 1.25rem; font-weight: 700; }
+.detail-section { margin-top: 26px; padding: 26px; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(25,49,39,.06); }
+.detail-section h2 { margin-top: 0; font-family: Georgia, serif; }
+.property-detail__description { line-height: 1.75; white-space: pre-line; }
+.property-detail__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.property-detail__facts div { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px solid #e8ebe9; }
+.property-detail__facts div:nth-child(odd) { margin-right: 26px; } .property-detail__facts dt { color: #66736d; } .property-detail__facts dd { margin: 0; font-weight: 700; text-align: right; }
+.detail-state { display: grid; min-height: 60vh; padding: 40px; place-content: center; justify-items: center; text-align: center; }
+.detail-state a { color: #22664e; font-weight: 700; }
+@media (max-width: 650px) { .property-detail__header { flex-direction: column; } .property-detail__stats { grid-template-columns: repeat(2, 1fr); gap: 20px 0; } .property-detail__stats div:nth-child(3) { border-left: 0; } .property-detail__facts { grid-template-columns: 1fr; } .property-detail__facts div:nth-child(odd) { margin-right: 0; } }

@@ -1,0 +1,4 @@
+.error-boundary { display: grid; min-height: 70vh; padding: 30px; place-content: center; justify-items: center; text-align: center; }
+.error-boundary h1 { font-family: Georgia, serif; }
+.error-boundary div { display: flex; gap: 12px; }
+.error-boundary button, .error-boundary a { padding: 11px 16px; border: 0; border-radius: 9px; color: white; background: #22664e; font-weight: 700; text-decoration: none; cursor: pointer; }
