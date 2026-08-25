@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 import { formatNumber, formatPrice } from "../utils/property";
 import PropertyImageCarousel from "./PropertyImageCarousel";
 import { useFavorites } from "../hooks/useFavorites";
@@ -56,5 +57,27 @@ function PropertyCard({ property }) {
     </article>
   );
 }
+
+const identifierType = PropTypes.oneOfType([PropTypes.number, PropTypes.string]);
+const numericValueType = PropTypes.oneOfType([PropTypes.number, PropTypes.string]);
+
+PropertyCard.propTypes = {
+  property: PropTypes.shape({
+    id: identifierType,
+    L_ListingID: identifierType,
+    L_Address: PropTypes.string,
+    L_City: PropTypes.string,
+    L_State: PropTypes.string,
+    L_Photos: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.string),
+      PropTypes.string,
+    ]),
+    L_Status: PropTypes.string,
+    L_SystemPrice: numericValueType,
+    L_Keyword2: numericValueType,
+    LM_Dec_3: numericValueType,
+    LM_Int2_3: numericValueType,
+  }).isRequired,
+};
 
 export default PropertyCard;
