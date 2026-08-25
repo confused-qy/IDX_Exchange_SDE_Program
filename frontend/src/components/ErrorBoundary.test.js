@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import ErrorBoundary from "./ErrorBoundary";
 
 function Broken({ fail = true }) { if (fail) throw new Error("test render failure"); return <p>Recovered</p>; }
