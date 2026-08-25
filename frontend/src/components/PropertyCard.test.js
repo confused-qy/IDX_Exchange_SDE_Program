@@ -17,7 +17,7 @@ const property = {
 
 function renderCard() {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <FavoritesProvider>
         <PropertyCard property={property} />
       </FavoritesProvider>
