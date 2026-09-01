@@ -134,6 +134,9 @@ router.get("/", async (req, res) => {
       });
     }
 
+    // SQL fragments are selected only by server code while user values stay in
+    // placeholders. This preserves flexible filtering without making SQL injection
+    // possible through a filter value.
     const conditions = [];
     const values = [];
 

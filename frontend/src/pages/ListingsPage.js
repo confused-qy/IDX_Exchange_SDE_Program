@@ -77,6 +77,7 @@ function ListingsPage() {
     loadProperties({}, 1, DEFAULT_SORT);
   };
 
+  // Round up because even one remaining record needs its own final page.
   const totalPages = Math.ceil(total / itemsPerPage);
 
   const handlePageChange = (page) => {
