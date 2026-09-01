@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon --legacy-watch --watch src src/server.js",
     "start": "node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand",
+    "test:coverage": "jest --coverage --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,20 @@
     "mysql2": "^3.22.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.5.1",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/routes/properties.js"
+    ],
+    "coverageThreshold": {
+      "./src/routes/properties.js": {
+        "statements": 70,
+        "lines": 70
+      }
+    }
   }
 }

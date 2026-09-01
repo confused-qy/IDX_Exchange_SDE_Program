@@ -7,6 +7,8 @@ export function getPaginationItems(currentPage, totalPages) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
 
+  // Keep a stable seven-slot control. Near either edge we show five consecutive
+  // pages; in the middle, neighboring pages provide context around the selection.
   if (currentPage <= 4) {
     return [1, 2, 3, 4, 5, "end-ellipsis", totalPages];
   }

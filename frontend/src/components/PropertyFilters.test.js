@@ -13,15 +13,26 @@ test("displays all six filter inputs", () => {
   expect(screen.getByLabelText("Baths")).toBeInTheDocument();
 });
 
-test("submits combined filters without empty values", async () => {
+test("submits all populated filters with their current values", async () => {
   const onSearch = jest.fn();
   render(<PropertyFilters onSearch={onSearch} onClear={jest.fn()} />);
 
   await userEvent.type(screen.getByLabelText("City"), "Seattle");
+  await userEvent.type(screen.getByLabelText("ZIP code"), "98101");
+  await userEvent.type(screen.getByLabelText("Min price"), "300000");
+  await userEvent.type(screen.getByLabelText("Max price"), "900000");
   await userEvent.selectOptions(screen.getByLabelText("Beds"), "3");
+  await userEvent.selectOptions(screen.getByLabelText("Baths"), "2");
   await userEvent.click(screen.getByRole("button", { name: "Search" }));
 
-  expect(onSearch).toHaveBeenCalledWith({ city: "Seattle", beds: "3" });
+  expect(onSearch).toHaveBeenCalledWith({
+    city: "Seattle",
+    zipcode: "98101",
+    minPrice: "300000",
+    maxPrice: "900000",
+    beds: "3",
+    baths: "2",
+  });
 });
 
 test("clear resets every field and calls onClear", async () => {

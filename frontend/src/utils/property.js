@@ -7,6 +7,9 @@ export function parsePhotos(rawPhotos) {
 
   if (typeof rawPhotos === "string") {
     try {
+      // The MLS import stores photo arrays as JSON text, while tests and newer
+      // callers may already supply arrays. Normalizing both shapes here keeps the
+      // rendering components simple and contains malformed legacy data safely.
       photos = JSON.parse(rawPhotos);
     } catch (error) {
       return [];
